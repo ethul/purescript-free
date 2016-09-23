@@ -3,6 +3,7 @@ module Control.Monad.Free
   , suspendF
   , liftF
   , liftFI
+  , liftFreeAp
   , hoistFree
   , injF
   , foldFree
@@ -14,6 +15,7 @@ module Control.Monad.Free
 
 import Prelude
 
+import Control.Applicative.Free (FreeAp, foldFreeAp)
 import Control.Monad.Rec.Class (class MonadRec, tailRecM)
 import Control.Monad.Trans (class MonadTrans)
 
@@ -77,6 +79,10 @@ liftF f = fromView (Bind (unsafeCoerceF f) (pure <<< unsafeCoerceVal))
 -- | `Free g` using `Inject` to go from `f` to `g`.
 liftFI :: forall f g. Inject f g => f ~> Free g
 liftFI fa = liftF (inj fa)
+
+-- | Lift a free applicative functor `f` into the free monad.
+liftFreeAp :: forall f a. FreeAp f a -> Free f a
+liftFreeAp = foldFreeAp liftF
 
 -- | Suspend a value given the applicative functor `f` into the free monad.
 suspendF :: forall f. Applicative f => Free f ~> Free f
